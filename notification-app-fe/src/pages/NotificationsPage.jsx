@@ -1,86 +1,55 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
-  Alert,
-  Badge,
-  Box,
-  CircularProgress,
-  Divider,
-  Pagination,
-  Stack,
+  Container,
   Typography,
+  Card,
+  CardContent,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 
-import { NotificationCard } from "../components/NotificationCard";
-import { NotificationFilter } from "../components/NotificationFilter";
-import { useNotifications } from "../hooks/useNotifications";
+import NotificationFilter from "../components/NotificationFilter";
+import useNotifications from "../hooks/useNotifications";
 
-export function NotificationsPage() {
-  const [filter, setFilter] = useState();
-  const [page, setPage] = useState("1");
+const NotificationsPage = () => {
+  const [type, setType] = useState("");
+  const [limit, setLimit] = useState(10);
 
-  const { notifications, totalPages, loading, error } = useNotifications();
-
-  const unreadCount = 2;
-
-  const handleFilterChange = (newFilter) => {
-
-  };
-
-  const handlePageChange = (_, newPage) => {
-
-  };
+  const { notifications, loading, error } = useNotifications(limit, type);
 
   return (
-    <Box sx={{ maxWidth: 720, mx: "auto", px: 2, py: 4 }}>
-      <Stack direction="row" alignItems="center" spacing={1.5} mb={3}>
-        <Badge badgeContent={unreadCount} color="primary" max={99}>
-          <NotificationsIcon sx={{ fontSize: 28 }} />
-        </Badge>
-        <Typography variant="h5" fontWeight={700}>
-          Notifications
-        </Typography>
-      </Stack>
+    <Container sx={{ mt: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        Notifications
+      </Typography>
 
-      <Divider sx={{ mb: 3 }} />
+      <NotificationFilter
+        type={type}
+        setType={setType}
+        limit={limit}
+        setLimit={setLimit}
+      />
 
-      <Box sx={{ marginBottom: 3 }}>
-        <NotificationFilter value={filter} onChange={handleFilterChange} />
-      </Box>
+      {loading && <CircularProgress />}
 
-      {true && (
-        <Box display="flex" justifyContent="center" py={6}>
-          <CircularProgress />
-        </Box>
-      )}
+      {error && <Alert severity="error">{error}</Alert>}
 
-      {!loading && error && (
-        <Alert severity="error">Failed to load notifications: {error}</Alert>
-      )}
+      {!loading &&
+        notifications.map((item) => (
+          <Card key={item.ID} sx={{ mb: 2 }}>
+            <CardContent>
+              <Typography variant="h6">{item.Type}</Typography>
 
-      {loading && !error && notifications.length == "0" && (
-        <Alert severity="info">Something message</Alert>
-      )}
+              <Typography>{item.Message}</Typography>
 
-      {loading && !error && notifications.length > 0 && (
-        <Stack spacing={1.5}>
-          {notifications.map((n) => (
-            <></>
-          ))}
-        </Stack>
-      )}
-
-      {!loading && (
-        <Box display="flex" justifyContent="center" mt={4}>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={handlePageChange}
-            color="primary"
-            shape="rounded"
-          />
-        </Box>
-      )}
-    </Box>
+              <Typography variant="body2">
+                {item.Timestamp}
+              </Typography>
+            </CardContent>
+          </Card>
+        ))}
+    </Container>
   );
-}
+};
+
+export default NotificationsPage;
